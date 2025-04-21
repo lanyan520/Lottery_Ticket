@@ -227,14 +227,19 @@ public class ThreeFunctionHelper implements ThreeInterface {
     }
 
     @Override
-    public void next3DNumber(String c3DNumber, int removeSpanSize, int selectMaxSums, int numberType, List<GallbladderCodeBean> codes, int maxWinnerCount, List<String> winnerNumbers, MyFilterSumSpan sumSpanBean) {
+    public void next3DNumber(String c3DNumber, int removeSpanSize, int selectMaxSums, int numberType, List<GallbladderCodeBean> codes, int maxWinnerCount, List<String> winnerNumbers, MyFilterSumSpan myFilterSumSpan) {
         //1计算出所有组选
         List<String> groupNumbers = getInstance().queryGroupNumberWithCount();
         System.out.println("------已完成所有组选计算-------");
         //2预测下期跨度，去掉预测的低频跨度值排序最后的几个
-        int cspan = ThreeCalculateHelper.getInstance().getSpan(c3DNumber);
-        List<Integer> nextSpans = queryNextSpans(cspan);
-        nextSpans = nextSpans.subList(0, nextSpans.size()-removeSpanSize);
+        List<Integer> nextSpans = null;
+        if(myFilterSumSpan!=null&&myFilterSumSpan.getSpans().size()>0){
+            nextSpans = myFilterSumSpan.getSpans();
+        }else{
+            int cspan = ThreeCalculateHelper.getInstance().getSpan(c3DNumber);
+            nextSpans = queryNextSpans(cspan);
+            nextSpans = nextSpans.subList(0, nextSpans.size()-removeSpanSize);
+        }
         System.out.println("------已完成所有跨度预测-------");
         //3将计算出的所有组选匹配跨度值，不在范围内的删除
         List<String> groupNumbersWithSpan = new ArrayList<>();
@@ -249,17 +254,21 @@ public class ThreeFunctionHelper implements ThreeInterface {
         System.out.println("------已完成踢出低频跨度-------");
 
         //4预测下期和值，取最高频的10个和值
-
-        int csum = ThreeCalculateHelper.getInstance().getSum(c3DNumber);
-        List<Integer> nextSums = queryNextSums(csum);
-        nextSpans = nextSums.subList(0, selectMaxSums);
+        List<Integer> nextSums = null;
+        if(myFilterSumSpan!=null&&myFilterSumSpan.getSums().size()>0){
+            nextSums = myFilterSumSpan.getSums();
+        }else{
+            int csum = ThreeCalculateHelper.getInstance().getSum(c3DNumber);
+            nextSums = queryNextSums(csum);
+            nextSums = nextSums.subList(0, nextSums.size()-selectMaxSums);
+        }
         System.out.println("------已完成所有和值预测-------");
         //5将上面计算出的结果再次与和值匹配，不在范围内的删除
         List<String> groupNumbersWithSum =  new ArrayList<>();
         for (int i = 0; i < groupNumbersWithSpan.size(); i++) {
             String number = groupNumbersWithSpan.get(i);
             int sum = ThreeCalculateHelper.getInstance().getSum(number);
-            boolean spanFlag = hasNextSum(nextSpans,sum);
+            boolean spanFlag = hasNextSum(nextSums,sum);
             if(spanFlag){
                 groupNumbersWithSum.add(number);
             }
@@ -334,9 +343,8 @@ public class ThreeFunctionHelper implements ThreeInterface {
         codes.add(new GallbladderCodeBean(testCodes,0,2));
         codes.add(new GallbladderCodeBean(c3DCodes,0,2));
 
-        Integer[] sumFilters = {6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22};
-        Integer[] spanFilters = {2,3,4,5,6,7,8};
-        MyFilterSumSpan sumSpanBean = new MyFilterSumSpan(sumFilters,spanFilters);
+
+        MyFilterSumSpan sumSpanBean = new MyFilterSumSpan(null,null);
 
         next3DNumber(c3DNumber,removeSpanSize,selectMaxSums,numberType,codes,maxWinnerCount, winnerNumbers,sumSpanBean);
     }
@@ -347,11 +355,11 @@ public class ThreeFunctionHelper implements ThreeInterface {
         //默认移除跨度低频最后三个
         int removeSpanSize = 4;
         //默认选择高频预测和值前10个
-        int selectMaxSums = 5;
+        int selectMaxSums = 10;
         //默认组选3 组选6排除豹子
-        int numberType = 2;
+        int numberType = 3;
         //默认移除今年中奖2次及以上号码
-        int maxWinnerCount = 2;
+        int maxWinnerCount = 3;
         //默认试机号、开机号、上期中奖好出0-2个
         List<String> winnerNumbers = Lottery_2025.DATA;
 
@@ -359,14 +367,20 @@ public class ThreeFunctionHelper implements ThreeInterface {
         String[] powerCodes = formatNumberWithGallbladderCode(powerNumber);
         String[] testCodes = formatNumberWithGallbladderCode(testNumber);
         String[] c3DCodes = formatNumberWithGallbladderCode(c3DNumber);
-        codes.add(new GallbladderCodeBean(powerCodes,0,1));
-        codes.add(new GallbladderCodeBean(testCodes,0,1));
-        codes.add(new GallbladderCodeBean(c3DCodes,0,1));
+        codes.add(new GallbladderCodeBean(powerCodes,0,2));
+        codes.add(new GallbladderCodeBean(testCodes,0,2));
+        codes.add(new GallbladderCodeBean(c3DCodes,0,2));
 
-        Integer[] sumFilters = {10,12,13,15,16,17};
-        Integer[] spanFilters = {2,3,4,5,8};
-        MyFilterSumSpan sumSpanBean = new MyFilterSumSpan(sumFilters,spanFilters);
+        List<Integer> sumFilters = new ArrayList<>();
+        sumFilters.add(10);
+        sumFilters.add(13);
+        List<Integer> spanFilters = new ArrayList<>();
+        spanFilters.add(5);
+        spanFilters.add(7);
+        spanFilters.add(8);
 
-        next3DNumber(c3DNumber,removeSpanSize,selectMaxSums,numberType,codes,maxWinnerCount, winnerNumbers,sumSpanBean);
+        MyFilterSumSpan myFilterSumSpan = new MyFilterSumSpan(sumFilters,spanFilters);
+
+        next3DNumber(c3DNumber,removeSpanSize,selectMaxSums,numberType,codes,maxWinnerCount, winnerNumbers,myFilterSumSpan);
     }
 }

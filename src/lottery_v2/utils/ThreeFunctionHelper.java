@@ -343,10 +343,7 @@ public class ThreeFunctionHelper implements ThreeInterface {
         codes.add(new GallbladderCodeBean(testCodes,0,2));
         codes.add(new GallbladderCodeBean(c3DCodes,0,2));
 
-
-        MyFilterSumSpan sumSpanBean = new MyFilterSumSpan(null,null);
-
-        next3DNumber(c3DNumber,removeSpanSize,selectMaxSums,numberType,codes,maxWinnerCount, winnerNumbers,sumSpanBean);
+        next3DNumber(c3DNumber,removeSpanSize,selectMaxSums,numberType,codes,maxWinnerCount, winnerNumbers,null);
     }
 
     @Override
@@ -371,15 +368,29 @@ public class ThreeFunctionHelper implements ThreeInterface {
         codes.add(new GallbladderCodeBean(testCodes,0,2));
         codes.add(new GallbladderCodeBean(c3DCodes,0,2));
 
-        List<Integer> sumFilters = new ArrayList<>();
-        sumFilters.add(10);
-        sumFilters.add(13);
-        List<Integer> spanFilters = new ArrayList<>();
-        spanFilters.add(5);
-        spanFilters.add(7);
-        spanFilters.add(8);
+        next3DNumber(c3DNumber,removeSpanSize,selectMaxSums,numberType,codes,maxWinnerCount, winnerNumbers,null);
+    }
 
-        MyFilterSumSpan myFilterSumSpan = new MyFilterSumSpan(sumFilters,spanFilters);
+    public void myNext3DNumber(String powerNumber, String testNumber, String c3DNumber,MyFilterSumSpan myFilterSumSpan) {
+        //缩水过滤流程设计
+        //默认移除跨度低频最后三个
+        int removeSpanSize = 4;
+        //默认选择高频预测和值前10个
+        int selectMaxSums = 10;
+        //默认组选3 组选6排除豹子
+        int numberType = 3;
+        //默认移除今年中奖2次及以上号码
+        int maxWinnerCount = 3;
+        //默认试机号、开机号、上期中奖好出0-2个
+        List<String> winnerNumbers = Lottery_2025.DATA;
+
+        List<GallbladderCodeBean> codes = new ArrayList<>();
+        String[] powerCodes = formatNumberWithGallbladderCode(powerNumber);
+        String[] testCodes = formatNumberWithGallbladderCode(testNumber);
+        String[] c3DCodes = formatNumberWithGallbladderCode(c3DNumber);
+        codes.add(new GallbladderCodeBean(powerCodes,0,2));
+        codes.add(new GallbladderCodeBean(testCodes,0,2));
+        codes.add(new GallbladderCodeBean(c3DCodes,0,2));
 
         next3DNumber(c3DNumber,removeSpanSize,selectMaxSums,numberType,codes,maxWinnerCount, winnerNumbers,myFilterSumSpan);
     }
